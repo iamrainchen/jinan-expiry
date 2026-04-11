@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金安分會 - 會員到期查詢</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 1.5rem; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.25rem; color: #1a1a1a; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card { background: #fff; border-radius: 8px; border: 0.5px solid #e0e0db; padding: 0.75rem 1rem; }
+  .stat-label { font-size: 12px; color: #888780; margin-bottom: 4px; }
+  .stat-num { font-size: 22px; font-weight: 500; }
+  .stat-num.red { color: #E24B4A; }
+  .stat-num.orange { color: #BA7517; }
+  .stat-num.blue-num { color: #378ADD; }
+  .stat-num.green-num { color: #3B6D11; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 0.5px solid #ccc; background: transparent; cursor: pointer; font-size: 13px; color: #1a1a1a; transition: background 0.15s; }
+  .filter-btn:hover { background: #f0f0ec; }
+  .filter-btn.active { font-weight: 500; }
+  .filter-btn.f-all.active { background: #f0f0ec; border-color: #999; }
+  .filter-btn.f-urgent.active { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
+  .filter-btn.f-warn.active { background: #FAEEDA; border-color: #BA7517; color: #854F0B; }
+  .filter-btn.f-ok.active { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
+  .filter-btn.f-future.active { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
+  .search-wrap { flex: 1; min-width: 160px; }
+  .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
+  .search-wrap input:focus { border-color: #999; }
+  .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
+  .member-list { display: flex; flex-direction: column; gap: 6px; }
+  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
+  .m-name { font-size: 14px; font-weight: 500; }
+  .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
+  .m-job { font-size: 13px; color: #5f5e5a; }
+  .m-date { font-size: 13px; color: #888780; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .badge-red { background: #FCEBEB; color: #A32D2D; border: 0.5px solid #F09595; }
+  .badge-orange { background: #FAEEDA; color: #854F0B; border: 0.5px solid #FAC775; }
+  .badge-green { background: #EAF3DE; color: #3B6D11; border: 0.5px solid #C0DD97; }
+  .badge-blue { background: #E6F1FB; color: #185FA5; border: 0.5px solid #B5D4F4; }
+  .sort-row { display: flex; gap: 6px; margin-bottom: 0.5rem; font-size: 12px; color: #888780; align-items: center; }
+  .sort-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; }
+  .sort-btn:hover, .sort-btn.active { color: #1a1a1a; background: #f0f0ec; }
+  .pending-tag { font-size: 11px; color: #854F0B; background: #FAEEDA; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .member-row { grid-template-columns: 1fr auto; }
+    .m-job, .m-date { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>金安分會 — 會員到期查詢</h1>
+
+<div class="stats-grid" id="statsGrid"></div>
+
+<div class="filter-bar">
+  <button class="filter-btn f-urgent" onclick="setFilter('urgent')">🔴 3個月內</button>
+  <button class="filter-btn f-warn" onclick="setFilter('warn')">🟠 3–6個月</button>
+  <button class="filter-btn f-ok" onclick="setFilter('ok')">🟢 6–12個月</button>
+  <button class="filter-btn f-future" onclick="setFilter('future')">🔵 1年以上</button>
+  <button class="filter-btn f-all active" onclick="setFilter('all')">全部</button>
+  <div class="search-wrap"><input type="text" id="searchInput" placeholder="搜尋姓名、職業…" oninput="render()"></div>
+</div>
+
+<div class="sort-row">
+  排序：
+  <span class="sort-btn active" id="sortDate" onclick="setSort('date')">到期日 ↑</span>
+  <span class="sort-btn" id="sortName" onclick="setSort('name')">姓名</span>
+</div>
+
+<div class="count-label" id="countLabel"></div>
+<div class="member-list" id="memberList"></div>
+
+<script>
+const TODAY = new Date('2026-04-11');
+
+const members = [
+  {name:'朱 世祺',job:'室內設計',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
+  {name:'賴 佩伶',job:'電腦&程式設計（其他）',type:'會員',status:'現任',exp:'2026-05-01'},
+  {name:'陳 芊妤',job:'財務顧問',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
+  {name:'邱 雅鈴',job:'物理治療師',type:'會員',status:'現任',exp:'2026-05-01'},
+  {name:'黃 奕甫',job:'健康&保健（其他）',type:'會員, 會員委員會',status:'現任',exp:'2026-06-01'},
+  {name:'呂 杰翰',job:'健康&保健（其他）',type:'會員',status:'現任',exp:'2026-06-01'},
+  {name:'洪 梓承',job:'粉刷師&裝飾師',type:'會員',status:'現任',exp:'2026-06-01'},
+  {name:'何 英銘',job:'包裝',type:'會員, 會員委員會',status:'現任',exp:'2026-06-01'},
+  {name:'簡 茹瑩',job:'旅行社',type:'會員',status:'現任',exp:'2026-06-01'},
+  {name:'洪 佑宜',job:'會計服務',type:'會員',status:'現任',exp:'2026-07-01'},
+  {name:'謝 佳恩',job:'印刷業-大圖輸出',type:'會員',status:'現任',exp:'2026-07-01'},
+  {name:'廖 羿為',job:'商業運輸',type:'會員, 導師協調人',status:'現任',exp:'2026-07-01'},
+  {name:'劉 鎧霆',job:'攝影師 - 商業',type:'會員',status:'現任',exp:'2026-07-01'},
+  {name:'曹 雅茲',job:'金融保險（其他）',type:'會員',status:'現任',exp:'2026-07-01'},
+  {name:'許 宏暐',job:'製造業（其他）',type:'會員, 會員委員會',status:'現任',exp:'2026-08-01'},
+  {name:'陳 庭漢',job:'財產保險',type:'會員',status:'現任',exp:'2026-08-01'},
+  {name:'趙 翊帆',job:'平面設計師',type:'會員',status:'現任',exp:'2026-08-01'},
+  {name:'許 哲文',job:'家具製造',type:'會員',status:'現任',exp:'2026-09-01'},
+  {name:'林 澐薪',job:'醫療服務',type:'會員, 會員委員會',status:'現任',exp:'2026-09-01'},
+  {name:'陳 炯霖',job:'攝影師',type:'會員',status:'現任',exp:'2026-09-01'},
+  {name:'高 翊峯',job:'商業顧問',type:'會員',status:'現任',exp:'2026-09-01'},
+  {name:'胡 哲維',job:'建築商/總承包商',type:'會員',status:'現任',exp:'2026-10-01'},
+  {name:'彭 欣如',job:'金融保險（其他）',type:'會員',status:'現任',exp:'2026-10-01'},
+  {name:'蕭 淑蓉',job:'媒體服務',type:'會員, 會員委員會',status:'現任',exp:'2026-10-01'},
+  {name:'練 羿岑',job:'建築（其他）',type:'會員, 教育協調人',status:'現任',exp:'2026-10-01'},
+  {name:'劉 耿逢',job:'活動策劃人',type:'會員',status:'現任',exp:'2026-10-01'},
+  {name:'王 博翰',job:'暖通空調',type:'會員',status:'現任',exp:'2026-11-01'},
+  {name:'洪 岳裕',job:'醫療服務',type:'會員, 會員委員會',status:'現任',exp:'2026-11-01'},
+  {name:'張 嘉倩',job:'品牌推廣',type:'會員',status:'現任',exp:'2026-12-01'},
+  {name:'劉 芯怡',job:'商業房地產',type:'會員, 發展協調人',status:'現任',exp:'2026-12-01'},
+  {name:'林 文偉',job:'廣告&營銷（其他）',type:'會員',status:'現任',exp:'2027-01-01'},
+  {name:'許 永嘉',job:'諮詢（其他）',type:'會員',status:'現任',exp:'2027-01-01'},
+  {name:'林 穎宏',job:'瓷磚工人',type:'會員',status:'現任',exp:'2027-01-01'},
+  {name:'羅 美淇',job:'細木工',type:'會員',status:'現任',exp:'2027-01-01'},
+  {name:'周 聖強',job:'藝術&娛樂（其他）',type:'來賓接待人, 會員',status:'現任',exp:'2027-01-01'},
+  {name:'邱 致憲',job:'健康&保健服務',type:'會員',status:'現任',exp:'2027-01-01'},
+  {name:'殷 如蒔',job:'餐飲業者',type:'會員, 會員委員會',status:'現任',exp:'2027-02-01'},
+  {name:'徐 凡雅',job:'財富管理',type:'會員',status:'現任',exp:'2027-03-01'},
+  {name:'張 睿样',job:'葬禮策劃/服務',type:'會員',status:'現任',exp:'2027-03-01'},
+  {name:'林 楷鈞',job:'建築&工程（其他）',type:'會員, 會員委員會',status:'現任',exp:'2027-04-01'},
+  {name:'李 赫茗',job:'律師',type:'會員',status:'現任',exp:'2027-04-01'},
+  {name:'邱 瑞瑋',job:'活動&商務服務（其他）',type:'會員, 活動協調人',status:'現任',exp:'2027-05-01'},
+  {name:'吳 宗恆',job:'室內設計',type:'主席, 會員',status:'待定續約',exp:'2027-07-01'},
+  {name:'陳 宥寧',job:'網頁設計',type:'副主席, 會員',status:'現任',exp:'2027-07-01'},
+  {name:'李 佳家',job:'網路行銷',type:'秘書/財務, 會員',status:'待定續約',exp:'2027-06-01'},
+];
+
+function daysDiff(expStr) {
+  return Math.round((new Date(expStr) - TODAY) / (1000*60*60*24));
+}
+function getCategory(days) {
+  if (days <= 0) return 'urgent';
+  if (days <= 90) return 'urgent';
+  if (days <= 180) return 'warn';
+  if (days <= 365) return 'ok';
+  return 'future';
+}
+function getBadge(days) {
+  const cat = getCategory(days);
+  if (days <= 0) return ['badge-red', '已過期'];
+  if (cat === 'urgent') return ['badge-red', days + ' 天後'];
+  if (cat === 'warn') return ['badge-orange', days + ' 天後'];
+  if (cat === 'ok') return ['badge-green', days + ' 天後'];
+  return ['badge-blue', days + ' 天後'];
+}
+
+let currentFilter = 'all';
+let currentSort = 'date';
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.f-' + f).classList.add('active');
+  render();
+}
+function setSort(s) {
+  currentSort = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort' + (s === 'date' ? 'Date' : 'Name')).classList.add('active');
+  render();
+}
+
+function updateStats() {
+  const counts = {urgent:0, warn:0, ok:0, future:0};
+  members.forEach(m => {
+    const d = daysDiff(m.exp);
+    const c = d <= 0 ? 'urgent' : getCategory(d);
+    if (counts[c] !== undefined) counts[c]++;
+  });
+  document.getElementById('statsGrid').innerHTML =
+    '<div class="stat-card"><div class="stat-label">🔴 3個月內到期</div><div class="stat-num red">' + counts.urgent + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🟠 3–6個月到期</div><div class="stat-num orange">' + counts.warn + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🟢 6–12個月到期</div><div class="stat-num green-num">' + counts.ok + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🔵 1年以上</div><div class="stat-num blue-num">' + counts.future + '</div></div>';
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = members.map(m => Object.assign({}, m, {days: daysDiff(m.exp)}));
+  if (currentFilter !== 'all') {
+    list = list.filter(m => getCategory(m.days) === currentFilter);
+  }
+  if (q) {
+    list = list.filter(m => m.name.includes(q) || m.job.toLowerCase().includes(q) || m.type.includes(q));
+  }
+  if (currentSort === 'date') {
+    list.sort(function(a,b){ return a.days - b.days; });
+  } else {
+    list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh-TW'); });
+  }
+  document.getElementById('countLabel').textContent = '顯示 ' + list.length + ' 位會員';
+  document.getElementById('memberList').innerHTML = list.map(function(m) {
+    var badge = getBadge(m.days);
+    var expDate = m.exp.slice(0,7).replace('-','/');
+    var pending = m.status === '待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
+    return '<div class="member-row">' +
+      '<div><div class="m-name">' + m.name + pending + '</div><div class="m-role">' + m.type + '</div></div>' +
+      '<div class="m-job">' + m.job + '</div>' +
+      '<div class="m-date">' + expDate + '</div>' +
+      '<span class="badge ' + badge[0] + '">' + badge[1] + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+updateStats();
+render();
+</script>
+</body>
+</html>
