@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -7,7 +8,10 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 1.5rem; }
-  h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.25rem; color: #1a1a1a; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
+  h1 { font-size: 18px; font-weight: 500; color: #1a1a1a; }
+  .export-btn { padding: 7px 18px; border-radius: 8px; border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .export-btn:hover { background: #C0DD97; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
   .stat-card { background: #fff; border-radius: 8px; border: 0.5px solid #e0e0db; padding: 0.75rem 1rem; }
   .stat-label { font-size: 12px; color: #888780; margin-bottom: 4px; }
@@ -17,7 +21,7 @@
   .stat-num.blue-num { color: #378ADD; }
   .stat-num.green-num { color: #3B6D11; }
   .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 0.5px solid #ccc; background: transparent; cursor: pointer; font-size: 13px; color: #1a1a1a; transition: background 0.15s; }
+  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 0.5px solid #ccc; background: transparent; cursor: pointer; font-size: 13px; color: #1a1a1a; }
   .filter-btn:hover { background: #f0f0ec; }
   .filter-btn.active { font-weight: 500; }
   .filter-btn.f-all.active { background: #f0f0ec; border-color: #999; }
@@ -29,8 +33,11 @@
   .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
   .search-wrap input:focus { border-color: #999; }
   .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
+  .list-header { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 12px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
+  .list-header .h-iv { color: #BA7517; }
   .member-list { display: flex; flex-direction: column; gap: 6px; }
-  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
+  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
+  .member-row.no-iv { grid-template-columns: 2fr 2fr 1fr auto; }
   .m-name { font-size: 14px; font-weight: 500; }
   .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
   .m-job { font-size: 13px; color: #5f5e5a; }
@@ -44,16 +51,24 @@
   .sort-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; }
   .sort-btn:hover, .sort-btn.active { color: #1a1a1a; background: #f0f0ec; }
   .pending-tag { font-size: 11px; color: #854F0B; background: #FAEEDA; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
-  @media (max-width: 600px) {
+  .iv-select { font-size: 12px; padding: 4px 7px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; min-width: 88px; }
+  .iv-select.done  { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
+  .iv-select.ongoing { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
+  .iv-select.pending { background: #f5f5f3; border-color: #ccc; color: #888780; }
+  .iv-na { font-size: 12px; color: #ccc; text-align: center; }
+  @media (max-width: 640px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .member-row { grid-template-columns: 1fr auto; }
-    .m-job, .m-date { display: none; }
+    .member-row, .member-row.no-iv { grid-template-columns: 1fr auto; }
+    .m-job, .m-date, .list-header { display: none; }
   }
 </style>
 </head>
 <body>
 
-<h1>金安分會 — 會員到期查詢</h1>
+<div class="top-bar">
+  <h1>金安分會 — 會員到期查詢</h1>
+  <button class="export-btn" onclick="exportExcel()">⬇ 匯出 Excel</button>
+</div>
 
 <div class="stats-grid" id="statsGrid"></div>
 
@@ -73,12 +88,21 @@
 </div>
 
 <div class="count-label" id="countLabel"></div>
+<div class="list-header">
+  <span>姓名 / 角色</span>
+  <span>職業</span>
+  <span>到期日</span>
+  <span class="h-iv">訪談狀態 <small style="font-weight:400;color:#ccc;">（210天內）</small></span>
+  <span></span>
+</div>
 <div class="member-list" id="memberList"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const TODAY = new Date('2026-04-11');
+var TODAY = new Date('2026-04-11');
+var IV_THRESHOLD = 210; // 只有這天數內才顯示訪談狀態
 
-const members = [
+var members = [
   {name:'朱 世祺',job:'室內設計',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
   {name:'賴 佩伶',job:'電腦&程式設計（其他）',type:'會員',status:'現任',exp:'2026-05-01'},
   {name:'陳 芊妤',job:'財務顧問',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
@@ -126,81 +150,119 @@ const members = [
   {name:'李 佳家',job:'網路行銷',type:'秘書/財務, 會員',status:'待定續約',exp:'2027-06-01'},
 ];
 
+var STORAGE_KEY = 'jinan_interview_status';
+function loadIV() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
+function saveIV(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch(e) {} }
+var ivData = loadIV();
+
 function daysDiff(expStr) {
   return Math.round((new Date(expStr) - TODAY) / (1000*60*60*24));
 }
 function getCategory(days) {
-  if (days <= 0) return 'urgent';
   if (days <= 90) return 'urgent';
   if (days <= 180) return 'warn';
   if (days <= 365) return 'ok';
   return 'future';
 }
 function getBadge(days) {
-  const cat = getCategory(days);
   if (days <= 0) return ['badge-red', '已過期'];
+  var cat = getCategory(days);
   if (cat === 'urgent') return ['badge-red', days + ' 天後'];
   if (cat === 'warn') return ['badge-orange', days + ' 天後'];
   if (cat === 'ok') return ['badge-green', days + ' 天後'];
   return ['badge-blue', days + ' 天後'];
 }
+function ivClass(val) {
+  if (val === '訪談完成') return 'done';
+  if (val === '約訪中') return 'ongoing';
+  return 'pending';
+}
+function onIVChange(name, val) {
+  ivData[name] = val;
+  saveIV(ivData);
+  var sel = document.querySelector('[data-iv="' + name + '"]');
+  if (sel) sel.className = 'iv-select ' + ivClass(val);
+}
 
-let currentFilter = 'all';
-let currentSort = 'date';
+var currentFilter = 'all';
+var currentSort = 'date';
 
 function setFilter(f) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
   document.querySelector('.f-' + f).classList.add('active');
   render();
 }
 function setSort(s) {
   currentSort = s;
-  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sort-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('sort' + (s === 'date' ? 'Date' : 'Name')).classList.add('active');
   render();
 }
 
 function updateStats() {
-  const counts = {urgent:0, warn:0, ok:0, future:0};
-  members.forEach(m => {
-    const d = daysDiff(m.exp);
-    const c = d <= 0 ? 'urgent' : getCategory(d);
-    if (counts[c] !== undefined) counts[c]++;
+  var c = {urgent:0, warn:0, ok:0, future:0};
+  members.forEach(function(m) {
+    var d = daysDiff(m.exp);
+    c[d <= 0 ? 'urgent' : getCategory(d)]++;
   });
   document.getElementById('statsGrid').innerHTML =
-    '<div class="stat-card"><div class="stat-label">🔴 3個月內到期</div><div class="stat-num red">' + counts.urgent + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🟠 3–6個月到期</div><div class="stat-num orange">' + counts.warn + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🟢 6–12個月到期</div><div class="stat-num green-num">' + counts.ok + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🔵 1年以上</div><div class="stat-num blue-num">' + counts.future + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">🔴 3個月內到期</div><div class="stat-num red">'+c.urgent+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">🟠 3–6個月到期</div><div class="stat-num orange">'+c.warn+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">🟢 6–12個月到期</div><div class="stat-num green-num">'+c.ok+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">🔵 1年以上</div><div class="stat-num blue-num">'+c.future+'</div></div>';
 }
 
 function render() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  let list = members.map(m => Object.assign({}, m, {days: daysDiff(m.exp)}));
-  if (currentFilter !== 'all') {
-    list = list.filter(m => getCategory(m.days) === currentFilter);
-  }
-  if (q) {
-    list = list.filter(m => m.name.includes(q) || m.job.toLowerCase().includes(q) || m.type.includes(q));
-  }
-  if (currentSort === 'date') {
-    list.sort(function(a,b){ return a.days - b.days; });
-  } else {
-    list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh-TW'); });
-  }
+  var q = document.getElementById('searchInput').value.toLowerCase();
+  var list = members.map(function(m){ return Object.assign({}, m, {days: daysDiff(m.exp)}); });
+  if (currentFilter !== 'all') list = list.filter(function(m){ return getCategory(m.days) === currentFilter; });
+  if (q) list = list.filter(function(m){ return m.name.includes(q) || m.job.toLowerCase().includes(q) || m.type.includes(q); });
+  if (currentSort === 'date') list.sort(function(a,b){ return a.days - b.days; });
+  else list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh-TW'); });
+
   document.getElementById('countLabel').textContent = '顯示 ' + list.length + ' 位會員';
+
   document.getElementById('memberList').innerHTML = list.map(function(m) {
     var badge = getBadge(m.days);
-    var expDate = m.exp.slice(0,7).replace('-','/');
-    var pending = m.status === '待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
-    return '<div class="member-row">' +
-      '<div><div class="m-name">' + m.name + pending + '</div><div class="m-role">' + m.type + '</div></div>' +
-      '<div class="m-job">' + m.job + '</div>' +
-      '<div class="m-date">' + expDate + '</div>' +
-      '<span class="badge ' + badge[0] + '">' + badge[1] + '</span>' +
+    var expDate = m.exp.slice(0,7).replace('-', '/');
+    var pend = m.status === '待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
+    var showIV = m.days <= IV_THRESHOLD;
+    var iv = ivData[m.name] || '待訪';
+    var ivc = ivClass(iv);
+
+    var ivCell = showIV
+      ? '<select class="iv-select '+ivc+'" data-iv="'+m.name+'" onchange="onIVChange(this.dataset.iv,this.value)">'+
+          '<option'+(iv==='待訪'?' selected':'')+'>待訪</option>'+
+          '<option'+(iv==='約訪中'?' selected':'')+'>約訪中</option>'+
+          '<option'+(iv==='訪談完成'?' selected':'')+'>訪談完成</option>'+
+        '</select>'
+      : '<span class="iv-na">—</span>';
+
+    return '<div class="member-row">'+
+      '<div><div class="m-name">'+m.name+pend+'</div><div class="m-role">'+m.type+'</div></div>'+
+      '<div class="m-job">'+m.job+'</div>'+
+      '<div class="m-date">'+expDate+'</div>'+
+      ivCell+
+      '<span class="badge '+badge[0]+'">'+badge[1]+'</span>'+
       '</div>';
   }).join('');
+}
+
+function exportExcel() {
+  var rows = [['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態']];
+  var list = members.map(function(m){ return Object.assign({}, m, {days: daysDiff(m.exp)}); });
+  list.sort(function(a,b){ return a.days - b.days; });
+  list.forEach(function(m) {
+    var ivVal = m.days <= IV_THRESHOLD ? (ivData[m.name] || '待訪') : '—';
+    rows.push([m.name, m.type, m.job, m.status, m.exp,
+      m.days > 0 ? m.days + '天後' : '已過期', ivVal]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '會員到期查詢');
+  XLSX.writeFile(wb, '金安分會_會員到期查詢.xlsx');
 }
 
 updateStats();
