@@ -10,55 +10,64 @@
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 1.5rem; }
   .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
   h1 { font-size: 18px; font-weight: 500; color: #1a1a1a; }
+  .top-right { display: flex; gap: 8px; align-items: center; }
   .export-btn { padding: 7px 18px; border-radius: 8px; border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-size: 13px; font-weight: 500; }
   .export-btn:hover { background: #C0DD97; }
+  .sync-status { font-size: 12px; color: #888780; }
+  .sync-status.ok  { color: #3B6D11; }
+  .sync-status.err { color: #E24B4A; }
+  .loading-bar { background: #EAF3DE; color: #3B6D11; font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; text-align: center; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
   .stat-card { background: #fff; border-radius: 8px; border: 0.5px solid #e0e0db; padding: 0.75rem 1rem; }
   .stat-label { font-size: 12px; color: #888780; margin-bottom: 4px; }
   .stat-num { font-size: 22px; font-weight: 500; }
-  .stat-num.red { color: #E24B4A; }
-  .stat-num.orange { color: #BA7517; }
+  .stat-num.red      { color: #E24B4A; }
+  .stat-num.orange   { color: #BA7517; }
   .stat-num.blue-num { color: #378ADD; }
-  .stat-num.green-num { color: #3B6D11; }
+  .stat-num.green-num{ color: #3B6D11; }
   .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
   .filter-btn { padding: 5px 14px; border-radius: 20px; border: 0.5px solid #ccc; background: transparent; cursor: pointer; font-size: 13px; color: #1a1a1a; }
   .filter-btn:hover { background: #f0f0ec; }
   .filter-btn.active { font-weight: 500; }
-  .filter-btn.f-all.active { background: #f0f0ec; border-color: #999; }
+  .filter-btn.f-all.active    { background: #f0f0ec; border-color: #999; }
   .filter-btn.f-urgent.active { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
-  .filter-btn.f-warn.active { background: #FAEEDA; border-color: #BA7517; color: #854F0B; }
-  .filter-btn.f-ok.active { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
+  .filter-btn.f-warn.active   { background: #FAEEDA; border-color: #BA7517; color: #854F0B; }
+  .filter-btn.f-ok.active     { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
   .filter-btn.f-future.active { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
   .search-wrap { flex: 1; min-width: 160px; }
   .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
   .search-wrap input:focus { border-color: #999; }
   .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
-  .list-header { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 12px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
+  .list-header { display: grid; grid-template-columns: 2fr 2fr 1fr 1.4fr auto; gap: 12px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
   .list-header .h-iv { color: #BA7517; }
   .member-list { display: flex; flex-direction: column; gap: 6px; }
-  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
-  .member-row.no-iv { grid-template-columns: 2fr 2fr 1fr auto; }
+  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1.4fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
   .m-name { font-size: 14px; font-weight: 500; }
   .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
-  .m-job { font-size: 13px; color: #5f5e5a; }
+  .m-job  { font-size: 13px; color: #5f5e5a; }
   .m-date { font-size: 13px; color: #888780; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-  .badge-red { background: #FCEBEB; color: #A32D2D; border: 0.5px solid #F09595; }
+  .badge-red    { background: #FCEBEB; color: #A32D2D; border: 0.5px solid #F09595; }
   .badge-orange { background: #FAEEDA; color: #854F0B; border: 0.5px solid #FAC775; }
-  .badge-green { background: #EAF3DE; color: #3B6D11; border: 0.5px solid #C0DD97; }
-  .badge-blue { background: #E6F1FB; color: #185FA5; border: 0.5px solid #B5D4F4; }
+  .badge-green  { background: #EAF3DE; color: #3B6D11; border: 0.5px solid #C0DD97; }
+  .badge-blue   { background: #E6F1FB; color: #185FA5; border: 0.5px solid #B5D4F4; }
   .sort-row { display: flex; gap: 6px; margin-bottom: 0.5rem; font-size: 12px; color: #888780; align-items: center; }
   .sort-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; }
   .sort-btn:hover, .sort-btn.active { color: #1a1a1a; background: #f0f0ec; }
   .pending-tag { font-size: 11px; color: #854F0B; background: #FAEEDA; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
-  .iv-select { font-size: 12px; padding: 4px 7px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; min-width: 88px; }
-  .iv-select.done  { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
+  .iv-cell { display: flex; align-items: center; gap: 5px; }
+  .iv-select { font-size: 12px; padding: 4px 7px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; flex: 1; min-width: 0; }
+  .iv-select.done    { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
   .iv-select.ongoing { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
   .iv-select.pending { background: #f5f5f3; border-color: #ccc; color: #888780; }
-  .iv-na { font-size: 12px; color: #ccc; text-align: center; }
+  .iv-select:disabled { opacity: 1; cursor: default; pointer-events: none; }
+  .unlock-btn { font-size: 13px; background: none; border: none; cursor: pointer; color: #ccc; padding: 2px 3px; border-radius: 4px; flex-shrink: 0; }
+  .unlock-btn:hover { color: #E24B4A; background: #FCEBEB; }
+  .iv-saving { font-size: 11px; color: #888780; }
+  .iv-na { font-size: 12px; color: #ccc; }
   @media (max-width: 640px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .member-row, .member-row.no-iv { grid-template-columns: 1fr auto; }
+    .member-row { grid-template-columns: 1fr auto; }
     .m-job, .m-date, .list-header { display: none; }
   }
 </style>
@@ -67,15 +76,20 @@
 
 <div class="top-bar">
   <h1>金安分會 — 會員到期查詢</h1>
-  <button class="export-btn" onclick="exportExcel()">⬇ 匯出 Excel</button>
+  <div class="top-right">
+    <span class="sync-status" id="syncStatus">載入中…</span>
+    <button class="export-btn" onclick="exportExcel()">⬇ 匯出 Excel</button>
+  </div>
 </div>
+
+<div id="loadingBar" class="loading-bar">正在從 Google Sheets 載入資料…</div>
 
 <div class="stats-grid" id="statsGrid"></div>
 
 <div class="filter-bar">
   <button class="filter-btn f-urgent" onclick="setFilter('urgent')">🔴 3個月內</button>
-  <button class="filter-btn f-warn" onclick="setFilter('warn')">🟠 3–6個月</button>
-  <button class="filter-btn f-ok" onclick="setFilter('ok')">🟢 6–12個月</button>
+  <button class="filter-btn f-warn"   onclick="setFilter('warn')">🟠 3–6個月</button>
+  <button class="filter-btn f-ok"     onclick="setFilter('ok')">🟢 6–12個月</button>
   <button class="filter-btn f-future" onclick="setFilter('future')">🔵 1年以上</button>
   <button class="filter-btn f-all active" onclick="setFilter('all')">全部</button>
   <div class="search-wrap"><input type="text" id="searchInput" placeholder="搜尋姓名、職業…" oninput="render()"></div>
@@ -89,9 +103,7 @@
 
 <div class="count-label" id="countLabel"></div>
 <div class="list-header">
-  <span>姓名 / 角色</span>
-  <span>職業</span>
-  <span>到期日</span>
+  <span>姓名 / 角色</span><span>職業</span><span>到期日</span>
   <span class="h-iv">訪談狀態 <small style="font-weight:400;color:#ccc;">（210天內）</small></span>
   <span></span>
 </div>
@@ -99,113 +111,152 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbwLgqOfsCWpm3UMaqnkoQIIoxQ0u9U_eSNfbngqN80BS-ZB_7eSB-WkV6T6yuvmEQTISw/exec';
 var TODAY = new Date('2026-04-11');
-var IV_THRESHOLD = 210; // 只有這天數內才顯示訪談狀態
+var IV_THRESHOLD = 210;
+var members = [];
+var ivData  = {}; // { name: { val, locked } }
 
-var members = [
-  {name:'朱 世祺',job:'室內設計',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
-  {name:'賴 佩伶',job:'電腦&程式設計（其他）',type:'會員',status:'現任',exp:'2026-05-01'},
-  {name:'陳 芊妤',job:'財務顧問',type:'會員, 會員委員會',status:'現任',exp:'2026-05-01'},
-  {name:'邱 雅鈴',job:'物理治療師',type:'會員',status:'現任',exp:'2026-05-01'},
-  {name:'黃 奕甫',job:'健康&保健（其他）',type:'會員, 會員委員會',status:'現任',exp:'2026-06-01'},
-  {name:'呂 杰翰',job:'健康&保健（其他）',type:'會員',status:'現任',exp:'2026-06-01'},
-  {name:'洪 梓承',job:'粉刷師&裝飾師',type:'會員',status:'現任',exp:'2026-06-01'},
-  {name:'何 英銘',job:'包裝',type:'會員, 會員委員會',status:'現任',exp:'2026-06-01'},
-  {name:'簡 茹瑩',job:'旅行社',type:'會員',status:'現任',exp:'2026-06-01'},
-  {name:'洪 佑宜',job:'會計服務',type:'會員',status:'現任',exp:'2026-07-01'},
-  {name:'謝 佳恩',job:'印刷業-大圖輸出',type:'會員',status:'現任',exp:'2026-07-01'},
-  {name:'廖 羿為',job:'商業運輸',type:'會員, 導師協調人',status:'現任',exp:'2026-07-01'},
-  {name:'劉 鎧霆',job:'攝影師 - 商業',type:'會員',status:'現任',exp:'2026-07-01'},
-  {name:'曹 雅茲',job:'金融保險（其他）',type:'會員',status:'現任',exp:'2026-07-01'},
-  {name:'許 宏暐',job:'製造業（其他）',type:'會員, 會員委員會',status:'現任',exp:'2026-08-01'},
-  {name:'陳 庭漢',job:'財產保險',type:'會員',status:'現任',exp:'2026-08-01'},
-  {name:'趙 翊帆',job:'平面設計師',type:'會員',status:'現任',exp:'2026-08-01'},
-  {name:'許 哲文',job:'家具製造',type:'會員',status:'現任',exp:'2026-09-01'},
-  {name:'林 澐薪',job:'醫療服務',type:'會員, 會員委員會',status:'現任',exp:'2026-09-01'},
-  {name:'陳 炯霖',job:'攝影師',type:'會員',status:'現任',exp:'2026-09-01'},
-  {name:'高 翊峯',job:'商業顧問',type:'會員',status:'現任',exp:'2026-09-01'},
-  {name:'胡 哲維',job:'建築商/總承包商',type:'會員',status:'現任',exp:'2026-10-01'},
-  {name:'彭 欣如',job:'金融保險（其他）',type:'會員',status:'現任',exp:'2026-10-01'},
-  {name:'蕭 淑蓉',job:'媒體服務',type:'會員, 會員委員會',status:'現任',exp:'2026-10-01'},
-  {name:'練 羿岑',job:'建築（其他）',type:'會員, 教育協調人',status:'現任',exp:'2026-10-01'},
-  {name:'劉 耿逢',job:'活動策劃人',type:'會員',status:'現任',exp:'2026-10-01'},
-  {name:'王 博翰',job:'暖通空調',type:'會員',status:'現任',exp:'2026-11-01'},
-  {name:'洪 岳裕',job:'醫療服務',type:'會員, 會員委員會',status:'現任',exp:'2026-11-01'},
-  {name:'張 嘉倩',job:'品牌推廣',type:'會員',status:'現任',exp:'2026-12-01'},
-  {name:'劉 芯怡',job:'商業房地產',type:'會員, 發展協調人',status:'現任',exp:'2026-12-01'},
-  {name:'林 文偉',job:'廣告&營銷（其他）',type:'會員',status:'現任',exp:'2027-01-01'},
-  {name:'許 永嘉',job:'諮詢（其他）',type:'會員',status:'現任',exp:'2027-01-01'},
-  {name:'林 穎宏',job:'瓷磚工人',type:'會員',status:'現任',exp:'2027-01-01'},
-  {name:'羅 美淇',job:'細木工',type:'會員',status:'現任',exp:'2027-01-01'},
-  {name:'周 聖強',job:'藝術&娛樂（其他）',type:'來賓接待人, 會員',status:'現任',exp:'2027-01-01'},
-  {name:'邱 致憲',job:'健康&保健服務',type:'會員',status:'現任',exp:'2027-01-01'},
-  {name:'殷 如蒔',job:'餐飲業者',type:'會員, 會員委員會',status:'現任',exp:'2027-02-01'},
-  {name:'徐 凡雅',job:'財富管理',type:'會員',status:'現任',exp:'2027-03-01'},
-  {name:'張 睿样',job:'葬禮策劃/服務',type:'會員',status:'現任',exp:'2027-03-01'},
-  {name:'林 楷鈞',job:'建築&工程（其他）',type:'會員, 會員委員會',status:'現任',exp:'2027-04-01'},
-  {name:'李 赫茗',job:'律師',type:'會員',status:'現任',exp:'2027-04-01'},
-  {name:'邱 瑞瑋',job:'活動&商務服務（其他）',type:'會員, 活動協調人',status:'現任',exp:'2027-05-01'},
-  {name:'吳 宗恆',job:'室內設計',type:'主席, 會員',status:'待定續約',exp:'2027-07-01'},
-  {name:'陳 宥寧',job:'網頁設計',type:'副主席, 會員',status:'現任',exp:'2027-07-01'},
-  {name:'李 佳家',job:'網路行銷',type:'秘書/財務, 會員',status:'待定續約',exp:'2027-06-01'},
-];
+// ── 載入 Google Sheets 資料 ──
+function loadFromSheet() {
+  fetch(API_URL)
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.status !== 'ok') throw new Error('API error');
+      members = [];
+      ivData  = {};
+      res.data.forEach(function(row) {
+        var name = String(row['姓名']||'').trim();
+        if (!name) return;
+        members.push({
+          name:   name,
+          type:   String(row['角色']   ||''),
+          job:    String(row['職業']   ||''),
+          status: String(row['會員狀態']||''),
+          exp:    formatDate(row['到期日']),
+        });
+        var iv  = String(row['訪談狀態']||'待訪').trim();
+        var lk  = String(row['鎖定']   ||'否').trim();
+        // 只有明確設定過才算鎖定（排除預設「待訪」未鎖）
+        ivData[name] = { val: iv, locked: lk === '是' };
+      });
+      document.getElementById('loadingBar').style.display = 'none';
+      setSyncStatus('ok', '已同步');
+      updateStats();
+      render();
+    })
+    .catch(function(err) {
+      document.getElementById('loadingBar').textContent = '⚠️ 無法連線到 Google Sheets，請重新整理';
+      setSyncStatus('err', '連線失敗');
+    });
+}
 
-var STORAGE_KEY = 'jinan_interview_status';
-function loadIV() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
-function saveIV(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch(e) {} }
-var ivData = loadIV();
+function formatDate(val) {
+  if (!val) return '';
+  if (typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}/)) return val.slice(0,10);
+  var d = new Date(val);
+  if (isNaN(d)) return String(val).slice(0,10);
+  return d.toISOString().slice(0,10);
+}
 
+function setSyncStatus(type, msg) {
+  var el = document.getElementById('syncStatus');
+  el.className = 'sync-status ' + type;
+  el.textContent = msg;
+}
+
+// ── 儲存到 Google Sheets ──
+function saveToSheet(name, iv, locked, cellEl) {
+  if (cellEl) cellEl.innerHTML = '<span class="iv-saving">儲存中…</span>';
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ name: name, iv: iv, locked: locked }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    ivData[name] = { val: iv, locked: locked };
+    setSyncStatus('ok', '已儲存 ✓');
+    if (cellEl) cellEl.innerHTML = buildIVInner(name);
+  })
+  .catch(function() {
+    setSyncStatus('err', '儲存失敗，請重試');
+    if (cellEl) cellEl.innerHTML = buildIVInner(name);
+  });
+}
+
+// ── 事件 ──
+function onIVChange(name, val) {
+  var cell = document.querySelector('[data-ivcell="' + name + '"]');
+  saveToSheet(name, val, true, cell);
+}
+function onUnlock(name) {
+  ivData[name] = { val: ivData[name] ? ivData[name].val : '待訪', locked: false };
+  var cell = document.querySelector('[data-ivcell="' + name + '"]');
+  if (cell) cell.innerHTML = buildIVInner(name);
+  saveToSheet(name, ivData[name].val, false, null);
+}
+
+// ── IV 欄位 HTML ──
+function ivCls(val) {
+  if (val === '訪談完成') return 'done';
+  if (val === '約訪中')   return 'ongoing';
+  return 'pending';
+}
+function buildIVInner(name) {
+  var rec    = ivData[name] || {};
+  var val    = rec.val    || '待訪';
+  var locked = rec.locked || false;
+  var cls    = ivCls(val);
+  var safeName = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  if (locked) {
+    return '<select class="iv-select locked '+cls+'" disabled><option selected>'+val+'</option></select>'+
+           '<button class="unlock-btn" onclick="onUnlock(\''+safeName+'\')" title="解除鎖定">🔓</button>';
+  }
+  return '<select class="iv-select '+cls+'" data-iv="'+name+'" onchange="onIVChange(this.dataset.iv,this.value)">'+
+           '<option'+(val==='待訪'   ?' selected':'')+'>待訪</option>'+
+           '<option'+(val==='約訪中' ?' selected':'')+'>約訪中</option>'+
+           '<option'+(val==='訪談完成'?' selected':'')+'>訪談完成</option>'+
+         '</select>';
+}
+
+// ── 工具 ──
 function daysDiff(expStr) {
   return Math.round((new Date(expStr) - TODAY) / (1000*60*60*24));
 }
 function getCategory(days) {
-  if (days <= 90) return 'urgent';
+  if (days <= 90)  return 'urgent';
   if (days <= 180) return 'warn';
   if (days <= 365) return 'ok';
   return 'future';
 }
 function getBadge(days) {
   if (days <= 0) return ['badge-red', '已過期'];
-  var cat = getCategory(days);
-  if (cat === 'urgent') return ['badge-red', days + ' 天後'];
-  if (cat === 'warn') return ['badge-orange', days + ' 天後'];
-  if (cat === 'ok') return ['badge-green', days + ' 天後'];
-  return ['badge-blue', days + ' 天後'];
-}
-function ivClass(val) {
-  if (val === '訪談完成') return 'done';
-  if (val === '約訪中') return 'ongoing';
-  return 'pending';
-}
-function onIVChange(name, val) {
-  ivData[name] = val;
-  saveIV(ivData);
-  var sel = document.querySelector('[data-iv="' + name + '"]');
-  if (sel) sel.className = 'iv-select ' + ivClass(val);
+  var c = getCategory(days);
+  if (c==='urgent') return ['badge-red',    days+' 天後'];
+  if (c==='warn')   return ['badge-orange',  days+' 天後'];
+  if (c==='ok')     return ['badge-green',   days+' 天後'];
+  return ['badge-blue', days+' 天後'];
 }
 
 var currentFilter = 'all';
-var currentSort = 'date';
+var currentSort   = 'date';
 
 function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelector('.f-' + f).classList.add('active');
+  document.querySelector('.f-'+f).classList.add('active');
   render();
 }
 function setSort(s) {
   currentSort = s;
   document.querySelectorAll('.sort-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('sort' + (s === 'date' ? 'Date' : 'Name')).classList.add('active');
+  document.getElementById('sort'+(s==='date'?'Date':'Name')).classList.add('active');
   render();
 }
 
 function updateStats() {
   var c = {urgent:0, warn:0, ok:0, future:0};
-  members.forEach(function(m) {
-    var d = daysDiff(m.exp);
-    c[d <= 0 ? 'urgent' : getCategory(d)]++;
-  });
+  members.forEach(function(m){ var d=daysDiff(m.exp); c[d<=0?'urgent':getCategory(d)]++; });
   document.getElementById('statsGrid').innerHTML =
     '<div class="stat-card"><div class="stat-label">🔴 3個月內到期</div><div class="stat-num red">'+c.urgent+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">🟠 3–6個月到期</div><div class="stat-num orange">'+c.warn+'</div></div>'+
@@ -215,35 +266,26 @@ function updateStats() {
 
 function render() {
   var q = document.getElementById('searchInput').value.toLowerCase();
-  var list = members.map(function(m){ return Object.assign({}, m, {days: daysDiff(m.exp)}); });
-  if (currentFilter !== 'all') list = list.filter(function(m){ return getCategory(m.days) === currentFilter; });
-  if (q) list = list.filter(function(m){ return m.name.includes(q) || m.job.toLowerCase().includes(q) || m.type.includes(q); });
-  if (currentSort === 'date') list.sort(function(a,b){ return a.days - b.days; });
-  else list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh-TW'); });
+  var list = members.map(function(m){ return Object.assign({},m,{days:daysDiff(m.exp)}); });
+  if (currentFilter!=='all') list=list.filter(function(m){ return getCategory(m.days)===currentFilter; });
+  if (q) list=list.filter(function(m){ return m.name.includes(q)||m.job.toLowerCase().includes(q)||m.type.includes(q); });
+  if (currentSort==='date') list.sort(function(a,b){ return a.days-b.days; });
+  else list.sort(function(a,b){ return a.name.localeCompare(b.name,'zh-TW'); });
 
-  document.getElementById('countLabel').textContent = '顯示 ' + list.length + ' 位會員';
-
+  document.getElementById('countLabel').textContent = '顯示 '+list.length+' 位會員';
   document.getElementById('memberList').innerHTML = list.map(function(m) {
-    var badge = getBadge(m.days);
-    var expDate = m.exp.slice(0,7).replace('-', '/');
-    var pend = m.status === '待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
-    var showIV = m.days <= IV_THRESHOLD;
-    var iv = ivData[m.name] || '待訪';
-    var ivc = ivClass(iv);
-
-    var ivCell = showIV
-      ? '<select class="iv-select '+ivc+'" data-iv="'+m.name+'" onchange="onIVChange(this.dataset.iv,this.value)">'+
-          '<option'+(iv==='待訪'?' selected':'')+'>待訪</option>'+
-          '<option'+(iv==='約訪中'?' selected':'')+'>約訪中</option>'+
-          '<option'+(iv==='訪談完成'?' selected':'')+'>訪談完成</option>'+
-        '</select>'
+    var badge   = getBadge(m.days);
+    var expDate = m.exp.slice(0,7).replace('-','/');
+    var pend    = m.status==='待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
+    var showIV  = m.days <= IV_THRESHOLD;
+    var ivHTML  = showIV
+      ? '<div class="iv-cell" data-ivcell="'+m.name+'">'+buildIVInner(m.name)+'</div>'
       : '<span class="iv-na">—</span>';
-
     return '<div class="member-row">'+
       '<div><div class="m-name">'+m.name+pend+'</div><div class="m-role">'+m.type+'</div></div>'+
       '<div class="m-job">'+m.job+'</div>'+
       '<div class="m-date">'+expDate+'</div>'+
-      ivCell+
+      ivHTML+
       '<span class="badge '+badge[0]+'">'+badge[1]+'</span>'+
       '</div>';
   }).join('');
@@ -251,12 +293,12 @@ function render() {
 
 function exportExcel() {
   var rows = [['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態']];
-  var list = members.map(function(m){ return Object.assign({}, m, {days: daysDiff(m.exp)}); });
-  list.sort(function(a,b){ return a.days - b.days; });
+  var list = members.map(function(m){ return Object.assign({},m,{days:daysDiff(m.exp)}); });
+  list.sort(function(a,b){ return a.days-b.days; });
   list.forEach(function(m) {
-    var ivVal = m.days <= IV_THRESHOLD ? (ivData[m.name] || '待訪') : '—';
-    rows.push([m.name, m.type, m.job, m.status, m.exp,
-      m.days > 0 ? m.days + '天後' : '已過期', ivVal]);
+    var rec   = m.days<=IV_THRESHOLD ? (ivData[m.name]||{}) : null;
+    var ivVal = rec ? (rec.val||'待訪') : '—';
+    rows.push([m.name,m.type,m.job,m.status,m.exp, m.days>0?m.days+'天後':'已過期', ivVal]);
   });
   var ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10}];
@@ -265,8 +307,8 @@ function exportExcel() {
   XLSX.writeFile(wb, '金安分會_會員到期查詢.xlsx');
 }
 
-updateStats();
-render();
+// 啟動
+loadFromSheet();
 </script>
 </body>
 </html>
