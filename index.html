@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -38,10 +37,11 @@
   .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
   .search-wrap input:focus { border-color: #999; }
   .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
-  .list-header { display: grid; grid-template-columns: 2fr 2fr 1fr 1.4fr auto; gap: 12px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
+  .list-header { display: grid; grid-template-columns: 1.8fr 1.5fr 0.8fr 1.2fr 1.2fr auto; gap: 10px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
   .list-header .h-iv { color: #BA7517; }
+  .list-header .h-owner { color: #534AB7; }
   .member-list { display: flex; flex-direction: column; gap: 6px; }
-  .member-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1.4fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
+  .member-row { display: grid; grid-template-columns: 1.8fr 1.5fr 0.8fr 1.2fr 1.2fr auto; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
   .m-name { font-size: 14px; font-weight: 500; }
   .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
   .m-job  { font-size: 13px; color: #5f5e5a; }
@@ -55,8 +55,9 @@
   .sort-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; }
   .sort-btn:hover, .sort-btn.active { color: #1a1a1a; background: #f0f0ec; }
   .pending-tag { font-size: 11px; color: #854F0B; background: #FAEEDA; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+  /* 訪談狀態 */
   .iv-cell { display: flex; align-items: center; gap: 5px; }
-  .iv-select { font-size: 12px; padding: 4px 7px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; flex: 1; min-width: 0; }
+  .iv-select { font-size: 12px; padding: 4px 6px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; flex: 1; min-width: 0; }
   .iv-select.done    { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
   .iv-select.ongoing { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
   .iv-select.pending { background: #f5f5f3; border-color: #ccc; color: #888780; }
@@ -65,10 +66,13 @@
   .unlock-btn:hover { color: #E24B4A; background: #FCEBEB; }
   .iv-saving { font-size: 11px; color: #888780; }
   .iv-na { font-size: 12px; color: #ccc; }
-  @media (max-width: 640px) {
+  /* 負責委員 */
+  .owner-select { font-size: 12px; padding: 4px 6px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; width: 100%; }
+  .owner-select.assigned { background: #EEEDFE; border-color: #7F77DD; color: #3C3489; }
+  @media (max-width: 768px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .member-row { grid-template-columns: 1fr auto; }
-    .m-job, .m-date, .list-header { display: none; }
+    .member-row, .list-header { grid-template-columns: 1.5fr 1fr auto; }
+    .m-job, .m-date { display: none; }
   }
 </style>
 </head>
@@ -103,8 +107,11 @@
 
 <div class="count-label" id="countLabel"></div>
 <div class="list-header">
-  <span>姓名 / 角色</span><span>職業</span><span>到期日</span>
+  <span>姓名 / 角色</span>
+  <span>職業</span>
+  <span>到期日</span>
   <span class="h-iv">訪談狀態 <small style="font-weight:400;color:#ccc;">（210天內）</small></span>
+  <span class="h-owner">負責委員</span>
   <span></span>
 </div>
 <div class="member-list" id="memberList"></div>
@@ -114,17 +121,19 @@
 var API_URL = 'https://script.google.com/macros/s/AKfycbwLgqOfsCWpm3UMaqnkoQIIoxQ0u9U_eSNfbngqN80BS-ZB_7eSB-WkV6T6yuvmEQTISw/exec';
 var TODAY = new Date('2026-04-11');
 var IV_THRESHOLD = 210;
-var members = [];
-var ivData  = {}; // { name: { val, locked } }
 
-// ── 載入 Google Sheets 資料 ──
+var OWNERS = ['','朱世祺','陳芊妤','黃奕甫','許宏暐','林澐薪','蕭淑蓉','洪岳裕','林楷鈞','殷如蒔','陳宥寧'];
+
+var members = [];
+var ivData    = {}; // { name: { val, locked } }
+var ownerData = {}; // { name: ownerName }
+
 function loadFromSheet() {
   fetch(API_URL)
     .then(function(r){ return r.json(); })
     .then(function(res) {
       if (res.status !== 'ok') throw new Error('API error');
-      members = [];
-      ivData  = {};
+      members = []; ivData = {}; ownerData = {};
       res.data.forEach(function(row) {
         var name = String(row['姓名']||'').trim();
         if (!name) return;
@@ -137,15 +146,15 @@ function loadFromSheet() {
         });
         var iv  = String(row['訪談狀態']||'待訪').trim();
         var lk  = String(row['鎖定']   ||'否').trim();
-        // 只有明確設定過才算鎖定（排除預設「待訪」未鎖）
         ivData[name] = { val: iv, locked: lk === '是' };
+        ownerData[name] = String(row['負責委員']||'').trim();
       });
       document.getElementById('loadingBar').style.display = 'none';
       setSyncStatus('ok', '已同步');
       updateStats();
       render();
     })
-    .catch(function(err) {
+    .catch(function() {
       document.getElementById('loadingBar').textContent = '⚠️ 無法連線到 Google Sheets，請重新整理';
       setSyncStatus('err', '連線失敗');
     });
@@ -158,22 +167,21 @@ function formatDate(val) {
   if (isNaN(d)) return String(val).slice(0,10);
   return d.toISOString().slice(0,10);
 }
-
 function setSyncStatus(type, msg) {
   var el = document.getElementById('syncStatus');
   el.className = 'sync-status ' + type;
   el.textContent = msg;
 }
 
-// ── 儲存到 Google Sheets ──
-function saveToSheet(name, iv, locked, cellEl) {
+// ── 儲存訪談狀態 ──
+function saveIVToSheet(name, iv, locked, cellEl) {
   if (cellEl) cellEl.innerHTML = '<span class="iv-saving">儲存中…</span>';
   fetch(API_URL, {
     method: 'POST',
-    body: JSON.stringify({ name: name, iv: iv, locked: locked }),
+    body: JSON.stringify({ action: 'updateIV', name: name, iv: iv, locked: locked }),
   })
   .then(function(r){ return r.json(); })
-  .then(function(res) {
+  .then(function() {
     ivData[name] = { val: iv, locked: locked };
     setSyncStatus('ok', '已儲存 ✓');
     if (cellEl) cellEl.innerHTML = buildIVInner(name);
@@ -184,19 +192,35 @@ function saveToSheet(name, iv, locked, cellEl) {
   });
 }
 
-// ── 事件 ──
+// ── 儲存負責委員 ──
+function saveOwnerToSheet(name, owner) {
+  ownerData[name] = owner;
+  setSyncStatus('ok', '儲存中…');
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'updateOwner', name: name, owner: owner }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function() { setSyncStatus('ok', '已儲存 ✓'); })
+  .catch(function() { setSyncStatus('err', '儲存失敗，請重試'); });
+}
+
 function onIVChange(name, val) {
   var cell = document.querySelector('[data-ivcell="' + name + '"]');
-  saveToSheet(name, val, true, cell);
+  saveIVToSheet(name, val, true, cell);
 }
 function onUnlock(name) {
   ivData[name] = { val: ivData[name] ? ivData[name].val : '待訪', locked: false };
   var cell = document.querySelector('[data-ivcell="' + name + '"]');
   if (cell) cell.innerHTML = buildIVInner(name);
-  saveToSheet(name, ivData[name].val, false, null);
+  saveIVToSheet(name, ivData[name].val, false, null);
+}
+function onOwnerChange(name, val) {
+  saveOwnerToSheet(name, val);
+  var sel = document.querySelector('[data-owner="' + name + '"]');
+  if (sel) sel.className = 'owner-select' + (val ? ' assigned' : '');
 }
 
-// ── IV 欄位 HTML ──
 function ivCls(val) {
   if (val === '訪談完成') return 'done';
   if (val === '約訪中')   return 'ongoing';
@@ -207,10 +231,10 @@ function buildIVInner(name) {
   var val    = rec.val    || '待訪';
   var locked = rec.locked || false;
   var cls    = ivCls(val);
-  var safeName = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  var safe   = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   if (locked) {
     return '<select class="iv-select locked '+cls+'" disabled><option selected>'+val+'</option></select>'+
-           '<button class="unlock-btn" onclick="onUnlock(\''+safeName+'\')" title="解除鎖定">🔓</button>';
+           '<button class="unlock-btn" onclick="onUnlock(\''+safe+'\')" title="解除鎖定">🔓</button>';
   }
   return '<select class="iv-select '+cls+'" data-iv="'+name+'" onchange="onIVChange(this.dataset.iv,this.value)">'+
            '<option'+(val==='待訪'   ?' selected':'')+'>待訪</option>'+
@@ -218,8 +242,15 @@ function buildIVInner(name) {
            '<option'+(val==='訪談完成'?' selected':'')+'>訪談完成</option>'+
          '</select>';
 }
+function buildOwnerSelect(name) {
+  var cur = ownerData[name] || '';
+  var cls = cur ? ' assigned' : '';
+  var opts = OWNERS.map(function(o) {
+    return '<option value="'+o+'"'+(o===cur?' selected':'')+'>'+( o||'— 未指定 —')+'</option>';
+  }).join('');
+  return '<select class="owner-select'+cls+'" data-owner="'+name+'" onchange="onOwnerChange(this.dataset.owner,this.value)">'+opts+'</select>';
+}
 
-// ── 工具 ──
 function daysDiff(expStr) {
   return Math.round((new Date(expStr) - TODAY) / (1000*60*60*24));
 }
@@ -286,28 +317,29 @@ function render() {
       '<div class="m-job">'+m.job+'</div>'+
       '<div class="m-date">'+expDate+'</div>'+
       ivHTML+
+      buildOwnerSelect(m.name)+
       '<span class="badge '+badge[0]+'">'+badge[1]+'</span>'+
       '</div>';
   }).join('');
 }
 
 function exportExcel() {
-  var rows = [['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態']];
+  var rows = [['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態','負責委員']];
   var list = members.map(function(m){ return Object.assign({},m,{days:daysDiff(m.exp)}); });
   list.sort(function(a,b){ return a.days-b.days; });
   list.forEach(function(m) {
     var rec   = m.days<=IV_THRESHOLD ? (ivData[m.name]||{}) : null;
     var ivVal = rec ? (rec.val||'待訪') : '—';
-    rows.push([m.name,m.type,m.job,m.status,m.exp, m.days>0?m.days+'天後':'已過期', ivVal]);
+    rows.push([m.name, m.type, m.job, m.status, m.exp,
+      m.days>0 ? m.days+'天後' : '已過期', ivVal, ownerData[m.name]||'']);
   });
   var ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10}];
+  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10},{wch:12}];
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '會員到期查詢');
   XLSX.writeFile(wb, '金安分會_會員到期查詢.xlsx');
 }
 
-// 啟動
 loadFromSheet();
 </script>
 </body>
