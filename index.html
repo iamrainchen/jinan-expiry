@@ -1,346 +1,39 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>金安分會 - 會員到期查詢</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 1.5rem; }
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
-  h1 { font-size: 18px; font-weight: 500; color: #1a1a1a; }
-  .top-right { display: flex; gap: 8px; align-items: center; }
-  .export-btn { padding: 7px 18px; border-radius: 8px; border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-size: 13px; font-weight: 500; }
-  .export-btn:hover { background: #C0DD97; }
-  .sync-status { font-size: 12px; color: #888780; }
-  .sync-status.ok  { color: #3B6D11; }
-  .sync-status.err { color: #E24B4A; }
-  .loading-bar { background: #EAF3DE; color: #3B6D11; font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; text-align: center; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-  .stat-card { background: #fff; border-radius: 8px; border: 0.5px solid #e0e0db; padding: 0.75rem 1rem; }
-  .stat-label { font-size: 12px; color: #888780; margin-bottom: 4px; }
-  .stat-num { font-size: 22px; font-weight: 500; }
-  .stat-num.red      { color: #E24B4A; }
-  .stat-num.orange   { color: #BA7517; }
-  .stat-num.blue-num { color: #378ADD; }
-  .stat-num.green-num{ color: #3B6D11; }
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 0.5px solid #ccc; background: transparent; cursor: pointer; font-size: 13px; color: #1a1a1a; }
-  .filter-btn:hover { background: #f0f0ec; }
-  .filter-btn.active { font-weight: 500; }
-  .filter-btn.f-all.active    { background: #f0f0ec; border-color: #999; }
-  .filter-btn.f-urgent.active { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
-  .filter-btn.f-warn.active   { background: #FAEEDA; border-color: #BA7517; color: #854F0B; }
-  .filter-btn.f-ok.active     { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
-  .filter-btn.f-future.active { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
-  .search-wrap { flex: 1; min-width: 160px; }
-  .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
-  .search-wrap input:focus { border-color: #999; }
-  .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
-  .list-header { display: grid; grid-template-columns: 1.8fr 1.5fr 0.8fr 1.2fr 1.2fr auto; gap: 10px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
-  .list-header .h-iv { color: #BA7517; }
-  .list-header .h-owner { color: #534AB7; }
-  .member-list { display: flex; flex-direction: column; gap: 6px; }
-  .member-row { display: grid; grid-template-columns: 1.8fr 1.5fr 0.8fr 1.2fr 1.2fr auto; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
-  .m-name { font-size: 14px; font-weight: 500; }
-  .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
-  .m-job  { font-size: 13px; color: #5f5e5a; }
-  .m-date { font-size: 13px; color: #888780; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-  .badge-red    { background: #FCEBEB; color: #A32D2D; border: 0.5px solid #F09595; }
-  .badge-orange { background: #FAEEDA; color: #854F0B; border: 0.5px solid #FAC775; }
-  .badge-green  { background: #EAF3DE; color: #3B6D11; border: 0.5px solid #C0DD97; }
-  .badge-blue   { background: #E6F1FB; color: #185FA5; border: 0.5px solid #B5D4F4; }
-  .sort-row { display: flex; gap: 6px; margin-bottom: 0.5rem; font-size: 12px; color: #888780; align-items: center; }
-  .sort-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; }
-  .sort-btn:hover, .sort-btn.active { color: #1a1a1a; background: #f0f0ec; }
-  .pending-tag { font-size: 11px; color: #854F0B; background: #FAEEDA; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
-  /* 訪談狀態 */
-  .iv-cell { display: flex; align-items: center; gap: 5px; }
-  .iv-select { font-size: 12px; padding: 4px 6px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; flex: 1; min-width: 0; }
-  .iv-select.done    { background: #EAF3DE; border-color: #3B6D11; color: #3B6D11; }
-  .iv-select.ongoing { background: #E6F1FB; border-color: #185FA5; color: #185FA5; }
-  .iv-select.pending { background: #f5f5f3; border-color: #ccc; color: #888780; }
-  .iv-select:disabled { opacity: 1; cursor: default; pointer-events: none; }
-  .unlock-btn { font-size: 13px; background: none; border: none; cursor: pointer; color: #ccc; padding: 2px 3px; border-radius: 4px; flex-shrink: 0; }
-  .unlock-btn:hover { color: #E24B4A; background: #FCEBEB; }
-  .iv-saving { font-size: 11px; color: #888780; }
-  .iv-na { font-size: 12px; color: #ccc; }
-  /* 負責委員 */
-  .owner-select { font-size: 12px; padding: 4px 6px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; width: 100%; }
-  .owner-select.assigned { background: #EEEDFE; border-color: #7F77DD; color: #3C3489; }
-  @media (max-width: 768px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .member-row, .list-header { grid-template-columns: 1.5fr 1fr auto; }
-    .m-job, .m-date { display: none; }
+var SHEET_NAME = '工作表1';
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = {};
+    for (var j = 0; j < headers.length; j++) {
+      row[headers[j]] = data[i][j];
+    }
+    rows.push(row);
   }
-</style>
-</head>
-<body>
-
-<div class="top-bar">
-  <h1>金安分會 — 會員到期查詢</h1>
-  <div class="top-right">
-    <span class="sync-status" id="syncStatus">載入中…</span>
-    <button class="export-btn" onclick="exportExcel()">⬇ 匯出 Excel</button>
-  </div>
-</div>
-
-<div id="loadingBar" class="loading-bar">正在從 Google Sheets 載入資料…</div>
-
-<div class="stats-grid" id="statsGrid"></div>
-
-<div class="filter-bar">
-  <button class="filter-btn f-urgent" onclick="setFilter('urgent')">🔴 3個月內</button>
-  <button class="filter-btn f-warn"   onclick="setFilter('warn')">🟠 3–6個月</button>
-  <button class="filter-btn f-ok"     onclick="setFilter('ok')">🟢 6–12個月</button>
-  <button class="filter-btn f-future" onclick="setFilter('future')">🔵 1年以上</button>
-  <button class="filter-btn f-all active" onclick="setFilter('all')">全部</button>
-  <div class="search-wrap"><input type="text" id="searchInput" placeholder="搜尋姓名、職業…" oninput="render()"></div>
-</div>
-
-<div class="sort-row">
-  排序：
-  <span class="sort-btn active" id="sortDate" onclick="setSort('date')">到期日 ↑</span>
-  <span class="sort-btn" id="sortName" onclick="setSort('name')">姓名</span>
-</div>
-
-<div class="count-label" id="countLabel"></div>
-<div class="list-header">
-  <span>姓名 / 角色</span>
-  <span>職業</span>
-  <span>到期日</span>
-  <span class="h-iv">訪談狀態 <small style="font-weight:400;color:#ccc;">（210天內）</small></span>
-  <span class="h-owner">負責委員</span>
-  <span></span>
-</div>
-<div class="member-list" id="memberList"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwLgqOfsCWpm3UMaqnkoQIIoxQ0u9U_eSNfbngqN80BS-ZB_7eSB-WkV6T6yuvmEQTISw/exec';
-var TODAY = new Date('2026-04-11');
-var IV_THRESHOLD = 210;
-
-var OWNERS = ['','朱世祺','陳芊妤','黃奕甫','許宏暐','林澐薪','蕭淑蓉','洪岳裕','林楷鈞','殷如蒔','陳宥寧'];
-
-var members = [];
-var ivData    = {}; // { name: { val, locked } }
-var ownerData = {}; // { name: ownerName }
-
-function loadFromSheet() {
-  fetch(API_URL)
-    .then(function(r){ return r.json(); })
-    .then(function(res) {
-      if (res.status !== 'ok') throw new Error('API error');
-      members = []; ivData = {}; ownerData = {};
-      res.data.forEach(function(row) {
-        var name = String(row['姓名']||'').trim();
-        if (!name) return;
-        members.push({
-          name:   name,
-          type:   String(row['角色']   ||''),
-          job:    String(row['職業']   ||''),
-          status: String(row['會員狀態']||''),
-          exp:    formatDate(row['到期日']),
-        });
-        var iv  = String(row['訪談狀態']||'待訪').trim();
-        var lk  = String(row['鎖定']   ||'否').trim();
-        ivData[name] = { val: iv, locked: lk === '是' };
-        ownerData[name] = String(row['負責委員']||'').trim();
-      });
-      document.getElementById('loadingBar').style.display = 'none';
-      setSyncStatus('ok', '已同步');
-      updateStats();
-      render();
-    })
-    .catch(function() {
-      document.getElementById('loadingBar').textContent = '⚠️ 無法連線到 Google Sheets，請重新整理';
-      setSyncStatus('err', '連線失敗');
-    });
+  return ContentService.createTextOutput(JSON.stringify({status:'ok', data:rows}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-function formatDate(val) {
-  if (!val) return '';
-  if (typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}/)) return val.slice(0,10);
-  var d = new Date(val);
-  if (isNaN(d)) return String(val).slice(0,10);
-  return d.toISOString().slice(0,10);
-}
-function setSyncStatus(type, msg) {
-  var el = document.getElementById('syncStatus');
-  el.className = 'sync-status ' + type;
-  el.textContent = msg;
-}
-
-// ── 儲存訪談狀態 ──
-function saveIVToSheet(name, iv, locked, cellEl) {
-  if (cellEl) cellEl.innerHTML = '<span class="iv-saving">儲存中…</span>';
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'updateIV', name: name, iv: iv, locked: locked }),
-  })
-  .then(function(r){ return r.json(); })
-  .then(function() {
-    ivData[name] = { val: iv, locked: locked };
-    setSyncStatus('ok', '已儲存 ✓');
-    if (cellEl) cellEl.innerHTML = buildIVInner(name);
-  })
-  .catch(function() {
-    setSyncStatus('err', '儲存失敗，請重試');
-    if (cellEl) cellEl.innerHTML = buildIVInner(name);
-  });
-}
-
-// ── 儲存負責委員 ──
-function saveOwnerToSheet(name, owner) {
-  ownerData[name] = owner;
-  setSyncStatus('ok', '儲存中…');
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'updateOwner', name: name, owner: owner }),
-  })
-  .then(function(r){ return r.json(); })
-  .then(function() { setSyncStatus('ok', '已儲存 ✓'); })
-  .catch(function() { setSyncStatus('err', '儲存失敗，請重試'); });
-}
-
-function onIVChange(name, val) {
-  var cell = document.querySelector('[data-ivcell="' + name + '"]');
-  saveIVToSheet(name, val, true, cell);
-}
-function onUnlock(name) {
-  ivData[name] = { val: ivData[name] ? ivData[name].val : '待訪', locked: false };
-  var cell = document.querySelector('[data-ivcell="' + name + '"]');
-  if (cell) cell.innerHTML = buildIVInner(name);
-  saveIVToSheet(name, ivData[name].val, false, null);
-}
-function onOwnerChange(name, val) {
-  saveOwnerToSheet(name, val);
-  var sel = document.querySelector('[data-owner="' + name + '"]');
-  if (sel) sel.className = 'owner-select' + (val ? ' assigned' : '');
-}
-
-function ivCls(val) {
-  if (val === '訪談完成') return 'done';
-  if (val === '約訪中')   return 'ongoing';
-  return 'pending';
-}
-function buildIVInner(name) {
-  var rec    = ivData[name] || {};
-  var val    = rec.val    || '待訪';
-  var locked = rec.locked || false;
-  var cls    = ivCls(val);
-  var safe   = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  if (locked) {
-    return '<select class="iv-select locked '+cls+'" disabled><option selected>'+val+'</option></select>'+
-           '<button class="unlock-btn" onclick="onUnlock(\''+safe+'\')" title="解除鎖定">🔓</button>';
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var params = JSON.parse(e.postData.contents);
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(params.name).trim()) {
+      if (params.action === 'updateIV') {
+        sheet.getRange(i+1, 6).setValue(params.iv);
+        sheet.getRange(i+1, 7).setValue(params.locked ? '是' : '否');
+      } else if (params.action === 'updateOwner1') {
+        sheet.getRange(i+1, 8).setValue(params.owner);
+      } else if (params.action === 'updateOwner2') {
+        sheet.getRange(i+1, 9).setValue(params.owner);
+      }
+      return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
   }
-  return '<select class="iv-select '+cls+'" data-iv="'+name+'" onchange="onIVChange(this.dataset.iv,this.value)">'+
-           '<option'+(val==='待訪'   ?' selected':'')+'>待訪</option>'+
-           '<option'+(val==='約訪中' ?' selected':'')+'>約訪中</option>'+
-           '<option'+(val==='訪談完成'?' selected':'')+'>訪談完成</option>'+
-         '</select>';
+  return ContentService.createTextOutput(JSON.stringify({status:'not found'}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
-function buildOwnerSelect(name) {
-  var cur = ownerData[name] || '';
-  var cls = cur ? ' assigned' : '';
-  var opts = OWNERS.map(function(o) {
-    return '<option value="'+o+'"'+(o===cur?' selected':'')+'>'+( o||'— 未指定 —')+'</option>';
-  }).join('');
-  return '<select class="owner-select'+cls+'" data-owner="'+name+'" onchange="onOwnerChange(this.dataset.owner,this.value)">'+opts+'</select>';
-}
-
-function daysDiff(expStr) {
-  return Math.round((new Date(expStr) - TODAY) / (1000*60*60*24));
-}
-function getCategory(days) {
-  if (days <= 90)  return 'urgent';
-  if (days <= 180) return 'warn';
-  if (days <= 365) return 'ok';
-  return 'future';
-}
-function getBadge(days) {
-  if (days <= 0) return ['badge-red', '已過期'];
-  var c = getCategory(days);
-  if (c==='urgent') return ['badge-red',    days+' 天後'];
-  if (c==='warn')   return ['badge-orange',  days+' 天後'];
-  if (c==='ok')     return ['badge-green',   days+' 天後'];
-  return ['badge-blue', days+' 天後'];
-}
-
-var currentFilter = 'all';
-var currentSort   = 'date';
-
-function setFilter(f) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelector('.f-'+f).classList.add('active');
-  render();
-}
-function setSort(s) {
-  currentSort = s;
-  document.querySelectorAll('.sort-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('sort'+(s==='date'?'Date':'Name')).classList.add('active');
-  render();
-}
-
-function updateStats() {
-  var c = {urgent:0, warn:0, ok:0, future:0};
-  members.forEach(function(m){ var d=daysDiff(m.exp); c[d<=0?'urgent':getCategory(d)]++; });
-  document.getElementById('statsGrid').innerHTML =
-    '<div class="stat-card"><div class="stat-label">🔴 3個月內到期</div><div class="stat-num red">'+c.urgent+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">🟠 3–6個月到期</div><div class="stat-num orange">'+c.warn+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">🟢 6–12個月到期</div><div class="stat-num green-num">'+c.ok+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">🔵 1年以上</div><div class="stat-num blue-num">'+c.future+'</div></div>';
-}
-
-function render() {
-  var q = document.getElementById('searchInput').value.toLowerCase();
-  var list = members.map(function(m){ return Object.assign({},m,{days:daysDiff(m.exp)}); });
-  if (currentFilter!=='all') list=list.filter(function(m){ return getCategory(m.days)===currentFilter; });
-  if (q) list=list.filter(function(m){ return m.name.includes(q)||m.job.toLowerCase().includes(q)||m.type.includes(q); });
-  if (currentSort==='date') list.sort(function(a,b){ return a.days-b.days; });
-  else list.sort(function(a,b){ return a.name.localeCompare(b.name,'zh-TW'); });
-
-  document.getElementById('countLabel').textContent = '顯示 '+list.length+' 位會員';
-  document.getElementById('memberList').innerHTML = list.map(function(m) {
-    var badge   = getBadge(m.days);
-    var expDate = m.exp.slice(0,7).replace('-','/');
-    var pend    = m.status==='待定續約' ? '<span class="pending-tag">待定續約</span>' : '';
-    var showIV  = m.days <= IV_THRESHOLD;
-    var ivHTML  = showIV
-      ? '<div class="iv-cell" data-ivcell="'+m.name+'">'+buildIVInner(m.name)+'</div>'
-      : '<span class="iv-na">—</span>';
-    return '<div class="member-row">'+
-      '<div><div class="m-name">'+m.name+pend+'</div><div class="m-role">'+m.type+'</div></div>'+
-      '<div class="m-job">'+m.job+'</div>'+
-      '<div class="m-date">'+expDate+'</div>'+
-      ivHTML+
-      buildOwnerSelect(m.name)+
-      '<span class="badge '+badge[0]+'">'+badge[1]+'</span>'+
-      '</div>';
-  }).join('');
-}
-
-function exportExcel() {
-  var rows = [['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態','負責委員']];
-  var list = members.map(function(m){ return Object.assign({},m,{days:daysDiff(m.exp)}); });
-  list.sort(function(a,b){ return a.days-b.days; });
-  list.forEach(function(m) {
-    var rec   = m.days<=IV_THRESHOLD ? (ivData[m.name]||{}) : null;
-    var ivVal = rec ? (rec.val||'待訪') : '—';
-    rows.push([m.name, m.type, m.job, m.status, m.exp,
-      m.days>0 ? m.days+'天後' : '已過期', ivVal, ownerData[m.name]||'']);
-  });
-  var ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10},{wch:12}];
-  var wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '會員到期查詢');
-  XLSX.writeFile(wb, '金安分會_會員到期查詢.xlsx');
-}
-
-loadFromSheet();
-</script>
-</body>
-</html>
