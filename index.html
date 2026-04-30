@@ -111,7 +111,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 var API_URL = 'https://script.google.com/macros/s/AKfycbwLgqOfsCWpm3UMaqnkoQIIoxQ0u9U_eSNfbngqN80BS-ZB_7eSB-WkV6T6yuvmEQTISw/exec';
-var TODAY = new Date('2026-04-11');
+var TODAY = new Date(); TODAY.setHours(0,0,0,0);
 var IV_THRESHOLD = 210;
 var OWNERS = ['','吳宗恆','朱世祺','陳芊妤','黃奕甫','許宏暐','林澐薪','蕭淑蓉','洪岳裕','林楷鈞','殷如蒔','陳宥寧'];
 var members=[]; var ivData={}; var owner1Data={}; var owner2Data={};
@@ -228,16 +228,16 @@ function render(){
   }).join('');
 }
 function exportExcel(){
-  var rows=[['姓名','角色','職業','會員狀態','到期日','剩餘天數','訪談狀態','訪談委員','紀錄委員']];
+  var rows=[['姓名','角色','職業','會員狀態','到期日','訪談狀態','訪談委員','紀錄委員']];
   var list=members.map(function(m){return Object.assign({},m,{days:daysDiff(m.exp)});});
   list.sort(function(a,b){return a.days-b.days;});
   list.forEach(function(m){
     var rec=m.days<=IV_THRESHOLD?(ivData[m.name]||{}):null;
     var ivVal=rec?(rec.val||'待訪'):'—';
-    rows.push([m.name,m.type,m.job,m.status,m.exp,m.days>0?m.days+'天後':'已過期',ivVal,owner1Data[m.name]||'',owner2Data[m.name]||'']);
+    rows.push([m.name,m.type,m.job,m.status,m.exp,ivVal,owner1Data[m.name]||'',owner2Data[m.name]||'']);
   });
   var ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:10},{wch:12},{wch:12}];
+  ws['!cols']=[{wch:12},{wch:22},{wch:20},{wch:10},{wch:12},{wch:10},{wch:12},{wch:12}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'會員到期查詢');
   XLSX.writeFile(wb,'金安分會_會員到期查詢.xlsx');
 }
