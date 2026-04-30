@@ -37,12 +37,12 @@
   .search-wrap input { width: 100%; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; font-size: 13px; outline: none; }
   .search-wrap input:focus { border-color: #999; }
   .count-label { font-size: 12px; color: #888780; margin-bottom: 0.75rem; }
-  .list-header { display: grid; grid-template-columns: 1.6fr 1.4fr 0.7fr 1.1fr 1.1fr 1.1fr auto; gap: 8px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
+  .list-header { display: grid; grid-template-columns: 1.6fr 1.4fr 0.7fr 0.7fr 1.1fr 1.1fr 1.1fr auto; gap: 8px; padding: 6px 14px; font-size: 11px; color: #888780; font-weight: 500; }
   .h-iv { color: #BA7517; }
   .h-owner1 { color: #534AB7; }
   .h-owner2 { color: #0F6E56; }
   .member-list { display: flex; flex-direction: column; gap: 6px; }
-  .member-row { display: grid; grid-template-columns: 1.6fr 1.4fr 0.7fr 1.1fr 1.1fr 1.1fr auto; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
+  .member-row { display: grid; grid-template-columns: 1.6fr 1.4fr 0.7fr 0.7fr 1.1fr 1.1fr 1.1fr auto; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid #e0e0db; background: #fff; }
   .m-name { font-size: 14px; font-weight: 500; }
   .m-role { font-size: 12px; color: #888780; margin-top: 2px; }
   .m-job  { font-size: 13px; color: #5f5e5a; }
@@ -101,7 +101,7 @@
 </div>
 <div class="count-label" id="countLabel"></div>
 <div class="list-header">
-  <span>姓名 / 角色</span><span>職業</span><span>到期日</span>
+  <span>姓名 / 角色</span><span>職業</span><span>到期日</span><span>剩餘天數</span>
   <span class="h-iv">訪談狀態 <small style="font-weight:400;color:#ccc;">（210天內）</small></span>
   <span class="h-owner1">訪談委員</span>
   <span class="h-owner2">紀錄委員</span>
@@ -118,6 +118,7 @@ var members=[]; var ivData={}; var owner1Data={}; var owner2Data={};
 
 function loadFromSheet(){
   fetch(API_URL).then(function(r){return r.json();}).then(function(res){
+    document.getElementById('loadingBar').style.display='none';
     if(res.status!=='ok') throw new Error('err');
     members=[]; ivData={}; owner1Data={}; owner2Data={};
     res.data.forEach(function(row){
@@ -127,7 +128,6 @@ function loadFromSheet(){
       owner1Data[name]=String(row['訪談委員']||'').trim();
       owner2Data[name]=String(row['紀錄委員']||'').trim();
     });
-    document.getElementById('loadingBar').style.display='none';
     setSyncStatus('ok','已同步'); updateStats(); render();
   }).catch(function(){
     document.getElementById('loadingBar').textContent='⚠️ 無法連線到 Google Sheets，請重新整理';
@@ -222,7 +222,7 @@ function render(){
     var ivHTML=showIV?'<div class="iv-cell" data-ivcell="'+m.name+'">'+buildIVInner(m.name)+'</div>':'<span class="iv-na">—</span>';
     return '<div class="member-row">'+
       '<div><div class="m-name">'+m.name+pend+'</div><div class="m-role">'+m.type+'</div></div>'+
-      '<div class="m-job">'+m.job+'</div><div class="m-date">'+expDate+'</div>'+
+      '<div class="m-job">'+m.job+'</div><div class="m-date">'+expDate+'</div><div class="m-date">'+(m.days>0?m.days+' 天':'已過期')+'</div>'+
       ivHTML+buildOwnerSelect(m.name,1)+buildOwnerSelect(m.name,2)+
       '<span class="badge '+badge[0]+'">'+badge[1]+'</span></div>';
   }).join('');
